@@ -2,7 +2,7 @@
 clear
 echo "╔═══════════════════════════════════════╗"
 echo "║    🔥 DDOS TERMUX INSTALLER           ║"
-echo "║    By: TeguhGanteng123                ║"
+echo "║    By: RpaezzXploit                ║"
 echo "║    GitHub: teguhganteng123            ║"
 echo "╚═══════════════════════════════════════╝"
 echo ""
