@@ -13,6 +13,38 @@ import sys
 import requests
 import threading
 import time
+import hashlib
+
+# ============ PASSWORD PROTECTION ============
+PASSWORD_HASH = "c9b70ffc77e8a8e3d4a3a2c7d5f5b5e5"  # Hash untuk "exploiter"
+
+def check_password():
+    """Cek password sebelum run tools"""
+    print("\n" + "="*50)
+    print("🔐 PRIVATE DDOS TOOLS - PASSWORD PROTECTED")
+    print("="*50)
+    
+    attempts = 3
+    for i in range(attempts):
+        password = input("\n🗝️  Enter password to unlock tools: ")
+        
+        # Hash input password
+        input_hash = hashlib.md5(password.encode()).hexdigest()
+        
+        if input_hash == PASSWORD_HASH:
+            print("\n✅ Access Granted! Welcome back, hacker! 😈")
+            print("🔥 Tools unlocked...")
+            time.sleep(1)
+            return True
+        else:
+            remaining = attempts - (i + 1)
+            if remaining > 0:
+                print(f"❌ Wrong password! {remaining} attempts remaining")
+            else:
+                print("💀 Maximum attempts reached. Tool locked!")
+                sys.exit(0)
+    
+    return False
 
 # CUSTOM BANNER
 def show_banner():
@@ -20,7 +52,7 @@ def show_banner():
 ╔═══════════════════════════════════════╗
 ║    🔥 DDOS PRIVATE TOOLS              ║
 ║    BY : RpaezzXploit                  ║
-║    Version: 2.1 - URL Edition         ║
+║    Version: 2.1 - PASSWORD PROTECTED  ║
 ╚═══════════════════════════════════════╝
 ===========================================
 Usage: python3 ddos.py <target_url> <duration>
@@ -81,6 +113,10 @@ def attack_thread(target_url, attack_duration):
 
 def main():
     global attack_active
+    
+    # ============ CHECK PASSWORD FIRST ============
+    if not check_password():
+        return
     
     # Show banner
     show_banner()
