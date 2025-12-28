@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DDOS Termux - By TeguhGanteng</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #0d1117; 
+            color: #c9d1d9; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: auto; 
+            border: 1px solid #30363d; 
+            padding: 30px; 
+            border-radius: 10px; 
+            background: #161b22; 
+        }
+        h1 { 
+            color: #ff6b6b; 
+            margin-bottom: 20px; 
+            border-bottom: 2px solid #30363d; 
+            padding-bottom: 10px; 
+        }
+        h2 { color: #58a6ff; margin: 20px 0 10px; }
+        .box { 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 10px 0; 
+        }
+        button { 
+            background: #238636; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin: 5px; 
+        }
+        button:hover { background: #2ea043; }
+        button.stop { background: #da3633; }
+        button.stop:hover { background: #f85149; }
+        input, select { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 10px 0; 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            color: #c9d1d9; 
+            border-radius: 5px; 
+        }
+        .status { 
+            background: #1c2128; 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin-top: 20px; 
+            border-left: 4px solid #58a6ff; 
+        }
+        .log { 
+            background: #000; 
+            color: #0ff; 
+            padding: 15px; 
+            border-radius: 5px; 
+            font-family: monospace; 
+            height: 200px; 
+            overflow-y: auto; 
+            margin-top: 20px; 
+        }
+        .credit { 
+            text-align: center; 
+            margin-top: 30px; 
+            color: #8b949e; 
+            font-size: 14px; 
+        }
+        .warning { 
+            background: rgba(255, 100, 100, 0.1); 
+            border: 1px solid #ff6b6b; 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 15px 0; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 DDOS TERMUX TOOL</h1>
+        <p><strong>By: TeguhGanteng123 | Credit: RpaezzXploit</strong></p>
+        
+        <div class="warning">
+            ⚠️ <strong>WARNING:</strong> This tool is for <u>EDUCATIONAL PURPOSES ONLY</u>. 
+            Use only on systems you own or have permission to test.
+        </div>
+        
+        <h2>🎯 Target Configuration</h2>
+        <div class="box">
+            <label>Target URL:</label>
+            <input type="text" id="target" placeholder="http://example.com" value="http://testphp.vulnweb.com">
+            
+            <label>Attack Method:</label>
+            <select id="method">
+                <option value="http">HTTP Flood</option>
+                <option value="slow">Slowloris (Light)</option>
+                <option value="mixed">Mixed Attack</option>
+            </select>
+            
+            <label>Threads (50-200):</label>
+            <input type="range" id="threads" min="50" max="200" value="120">
+            <span id="threadCount">120</span>
+            
+            <label>Duration (seconds):</label>
+            <input type="range" id="duration" min="30" max="600" value="180">
+            <span id="durationCount">180s</span>
+        </div>
+        
+        <h2>⚡ Control Panel</h2>
+        <div class="box">
+            <button onclick="startAttack()" id="startBtn">🚀 START ATTACK</button>
+            <button onclick="stopAttack()" id="stopBtn" class="stop" disabled>🛑 STOP ATTACK</button>
+            <button onclick="testConnection()">🔍 TEST CONNECTION</button>
+        </div>
+        
+        <div class="status" id="status">
+            <strong>Status:</strong> Ready
+        </div>
+        
+        <h2>📊 Attack Log</h2>
+        <div class="log" id="log">
+            [SYSTEM] DDOS Tool v1.0 loaded<br>
+            [SYSTEM] For educational use only<br>
+        </div>
+        
+        <h2>📁 Installation</h2>
+        <div class="box">
+            <code>git clone https://github.com/teguhganteng123/DDos-termuxx</code><br>
+            <code>cd DDos-termuxx</code><br>
+            <code>python3 ddos.py</code>
+        </div>
+        
+        <div class="credit">
+            © 2024 TeguhGanteng123 | GitHub: github.com/teguhganteng123<br>
+            Tools ini hanya untuk pembelajaran keamanan siber.
+        </div>
+    </div>
+
+    <script>
+        let attackRunning = false;
+        let requestCount = 0;
+        let startTime = 0;
+        
+        // Update slider values
+        document.getElementById('threads').oninput = function() {
+            document.getElementById('threadCount').textContent = this.value;
+        };
+        document.getElementById('duration').oninput = function() {
+            document.getElementById('durationCount').textContent = this.value + 's';
+        };
+        
+        function log(msg) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function startAttack() {
+            if (attackRunning) return;
+            
+            const target = document.getElementById('target').value;
+            const method = document.getElementById('method').value;
+            const threads = parseInt(document.getElementById('threads').value);
+            const duration = parseInt(document.getElementById('duration').value);
+            
+            if (!target) {
+                alert('Please enter target URL');
+                return;
+            }
+            
+            attackRunning = true;
+            requestCount = 0;
+            startTime = Date.now();
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            
+            document.getElementById('status').innerHTML = `
+                <strong>Status:</strong> <span style="color:#ff6b6b">ATTACKING</span><br>
+                Target: ${target}<br>
+                Method: ${method}<br>
+                Threads: ${threads}<br>
+                Duration: ${duration}s<br>
+                Requests: <span id="reqCount">0</span>
+            `;
+            
+            log(`Attack started on ${target}`);
+            log(`Method: ${method} | Threads: ${threads} | Duration: ${duration}s`);
+            
+            // Simulate attack
+            simulateAttack(duration);
+            
+            // Auto stop
+            setTimeout(() => {
+                if (attackRunning) stopAttack();
+            }, duration * 1000);
+        }
+        
+        function simulateAttack(duration) {
+            const interval = setInterval(() => {
+                if (!attackRunning) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                requestCount += Math.floor(Math.random() * 50) + 10;
+                document.getElementById('reqCount').textContent = requestCount;
+                
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                if (elapsed >= duration) {
+                    clearInterval(interval);
+                }
+            }, 500);
+        }
+        
+        function stopAttack() {
+            attackRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            
+            document.getElementById('status').innerHTML = `
+                <strong>Status:</strong> <span style="color:#58a6ff">STOPPED</span><br>
+                Total requests: ${requestCount}<br>
+                Duration: ${Math.floor((Date.now() - startTime) / 1000)}s
+            `;
+            
+            log(`Attack stopped. Total requests: ${requestCount}`);
+        }
+        
+        function testConnection() {
+            const target = document.getElementById('target').value;
+            if (!target) return;
+            
+            log(`Testing connection to ${target}...`);
+            document.getElementById('status').innerHTML = '<strong>Status:</strong> Testing connection...';
+            
+            // Simulate test
+            setTimeout(() => {
+                const success = Math.random() > 0.3;
+                if (success) {
+                    log(`Connection to ${target} successful`);
+                    document.getElementById('status').innerHTML = '<strong>Status:</strong> Connection OK';
+                } else {
+                    log(`Connection to ${target} failed`);
+                    document.getElementById('status').innerHTML = '<strong>Status:</strong> Connection failed';
+                }
+            }, 1500);
+        }
+        
+        // Auto-update time
+        setInterval(() => {
+            if (attackRunning) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const reqCount = document.getElementById('reqCount');
+                if (reqCount) {
+                    reqCount.textContent = requestCount;
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
